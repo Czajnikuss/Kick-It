@@ -14,8 +14,8 @@ public class AllObsticles : MonoBehaviour
         obsticleMatrix = new GameObject[xDim, yDim];
         obsticlePattern = new bool[xDim, yDim];
         InitializeObsticles();
-        RandomizeObsticles();
-        SetObsticles();
+        //RandomizeObsticles();
+        //SetObsticles();
     }
 
     // Update is called once per frame
@@ -25,12 +25,15 @@ public class AllObsticles : MonoBehaviour
     }
     public void InitializeObsticles()
     {
+        GameObject tempObst;
         for (int i = 0; i < xDim; i++)
         {
             for (int j = 0; j < yDim; j++)
             {
-                obsticleMatrix[i,j] = Instantiate(obsticle, new Vector3(9f, 1f+(j *3f), -5f + (i * 4f)),Quaternion.identity );
-
+                tempObst = Instantiate(obsticle, new Vector3(9f, 1f+(j *3f), -5f + (i * 4f)),Quaternion.identity );
+                
+                obsticleMatrix[i,j] = tempObst;
+                tempObst.SetActive(false);
             }
         }
     }

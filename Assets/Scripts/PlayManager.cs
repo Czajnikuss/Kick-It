@@ -34,19 +34,24 @@ public class PlayManager : MonoBehaviour
     AllObsticles allObsticles;
     AllTargets allTargets;
     int ballNumber, targetNumber;
-    public GameObject winPanel, losePanel, gamePanel;
+    public GameObject winPanel, losePanel, gamePanel, ballPrefab;
 
     void Start()
     {
         winPanel.SetActive(false);
         losePanel.SetActive(false);
         gamePanel.SetActive(true);
+        
         moves=startMoves;
         movesText.text = "Moves: " + moves.ToString();
-        ball = FindObjectOfType<BallHandler>();
+        
+        GameObject tempBall = Instantiate(ballPrefab, new Vector3(16f, 1f, 0.3f), Quaternion.identity);
+        ball = tempBall.GetComponent<BallHandler>();
+        
         endPoint = FindObjectOfType<EndPoint>();
         allObsticles = FindObjectOfType<AllObsticles>();
         allTargets = FindObjectOfType<AllTargets>();
+        
         CreateLevelsList(50);
         StartCoroutine("ResetFrameAfter");
     }
@@ -96,6 +101,7 @@ public class PlayManager : MonoBehaviour
         moves=startMoves;
         movesText.text = "Moves: " + moves.ToString();
         movesPossible = true;
+        ball.gameObject.SetActive(true);
         ball.transform.position = ball.startPos;
 
         ball.rigidbody.velocity =  Vector3.zero;
@@ -123,6 +129,7 @@ public class PlayManager : MonoBehaviour
         moves=startMoves;
         movesText.text = "Moves: " + moves.ToString();
         movesPossible = true;
+        ball.gameObject.SetActive(true);
         ball.transform.position = ball.startPos;
 
         ball.rigidbody.velocity =  Vector3.zero;
@@ -150,6 +157,7 @@ public class PlayManager : MonoBehaviour
         moves=startMoves;
         movesText.text = "Moves: " + moves.ToString();
         movesPossible = true;
+        ball.gameObject.SetActive(true);
         ball.transform.position = ball.startPos;
 
         ball.rigidbody.velocity =  Vector3.zero;

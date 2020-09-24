@@ -15,8 +15,8 @@ public class AllTargets : MonoBehaviour
         targetMatrix = new GameObject[xDim, yDim];
         targetPattern = new bool[xDim, yDim];
         InitializeTargets();
-        RandomizeTargets();
-        SetTargets();
+        //RandomizeTargets();
+       // SetTargets();
     }
 
     // Update is called once per frame
@@ -26,11 +26,14 @@ public class AllTargets : MonoBehaviour
     }
     public void InitializeTargets()
     {
+        GameObject tempTarget;
         for (int i = 0; i < xDim; i++)
         {
             for (int j = 0; j < yDim; j++)
             {
-                targetMatrix[i,j] = Instantiate(target, new Vector3(1f, 1f+(j *2f), -5f + (i * 3f)),Quaternion.identity );
+                tempTarget = Instantiate(target, new Vector3(1f, 1f+(j *2f), -5f + (i * 3f)),Quaternion.identity );
+                tempTarget.SetActive(false);
+                targetMatrix[i,j] = tempTarget;  
             }
         }
     }
