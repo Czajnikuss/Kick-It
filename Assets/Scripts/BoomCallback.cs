@@ -10,7 +10,7 @@ public class BoomCallback : MonoBehaviour
     }
 
     private void OnParticleSystemStopped() {
-        Debug.Log("target out");
+       // Debug.Log("target out");
         endPoint.ParticleSystemComplete();
         
 

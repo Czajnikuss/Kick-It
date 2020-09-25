@@ -83,19 +83,19 @@ public class AllTargets : MonoBehaviour
     }
     public void RandomizeTargets(int maxTarget)
     {
-        if(maxTarget>xDim*yDim)maxTarget=xDim*yDim;
+        if(maxTarget>xDim*yDim)maxTarget=(xDim*yDim) - 5;
         int count =0;
         targetPattern = new bool[xDim,yDim];
-         for (int i = 0; i < xDim; i++)
+        while(count<maxTarget)
         {
-            for (int j = 0; j < yDim; j++)
+            ramdomAgain:
+            int i = Mathf.RoundToInt(Random.Range(0,xDim));
+            int j = Mathf.RoundToInt(Random.Range(0,yDim));
+            if(targetPattern[i,j]) goto ramdomAgain;
+            else
             {
-                if(Mathf.RoundToInt(Random.Range(0,1f)) == 1f) 
-                {
-                    targetPattern[i,j] = true;
-                    count++;
-                    if(count>= maxTarget) return;
-                }
+                targetPattern[i,j] = true;
+                count++;
             }
         }
     }

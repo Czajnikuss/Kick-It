@@ -24,7 +24,7 @@ public class PlayManager : MonoBehaviour
 {
     public List<LevelConfig> allLevels = new List<LevelConfig>();
     public TextMeshProUGUI movesText, ballsText, targetCaunterText;
-    public int moves, startMoves, currentLevel=0;
+    public int moves, startMoves, currentLevel;
     private float timer, suspensionTime = 0.5f;
     public bool inputAllowed=false;
     
@@ -34,13 +34,16 @@ public class PlayManager : MonoBehaviour
     AllObsticles allObsticles;
     AllTargets allTargets;
     int ballNumber, targetNumber;
-    public GameObject winPanel, losePanel, gamePanel, ballPrefab;
+    public GameObject winPanel, losePanel, gamePanel,mainMenuPanel, ballPrefab;
 
     void Start()
     {
         winPanel.SetActive(false);
         losePanel.SetActive(false);
         gamePanel.SetActive(true);
+        mainMenuPanel.SetActive(true);
+
+        currentLevel = PlayerPrefs.GetInt("lastLevel",0);
         
         moves=startMoves;
         movesText.text = "Moves: " + moves.ToString();
@@ -53,13 +56,13 @@ public class PlayManager : MonoBehaviour
         allTargets = FindObjectOfType<AllTargets>();
         
         CreateLevelsList(50);
-        StartCoroutine("ResetFrameAfter");
+        
     }
     IEnumerator ResetFrameAfter()
     {
         yield return new WaitForSeconds(0.5f);
         
-        ResetThisLevel(currentLevel);
+        ResetThisLevel();
     }
     public void MoveMade()
     {
@@ -253,7 +256,8 @@ public class PlayManager : MonoBehaviour
         if(targetNumber<=0)
         {
             //WIN
-            Debug.Log("WIN");
+            Debug.Log("WIN level: " + currentLevel);
+            PlayerPrefs.SetInt("lastLevel", currentLevel);
             Time.timeScale = 0;
             gamePanel.SetActive(false);
             winPanel.SetActive(true);
@@ -262,23 +266,43 @@ public class PlayManager : MonoBehaviour
         }
 
     }
+    public void NextLevelButtonPressed()
+    {
+        if(currentLevel%2==0)
+        {
+            AppodealHandle.Instance.ShowVideoForNextLevel();
+        }
+        else NextLevel();
+    }
+    
     public void NextLevel()
     {
         currentLevel++;
         Time.timeScale = 1;
         
-        ResetThisLevel(currentLevel);
+        StartCoroutine("ResetFrameAfter");
     }
     public void CreateLevelsList(int numerOfLevels)
     {
         bool[,] tempObs = new bool[LevelConfig.xObs, LevelConfig.yObs], tempTar = new bool[LevelConfig.xTarg, LevelConfig.yTarg];
         for (int i = 0; i < numerOfLevels; i++)
         {
-            allTargets.RandomizeTargets(i+1);
+            allTargets.RandomizeTargets(Mathf.RoundToInt(i/10f)+1);
             tempTar = allTargets.targetPattern;
-            allObsticles.RandomizeObsticles(i);
+            allObsticles.RandomizeObsticles((int)Mathf.Floor(i/10f));
             tempObs = allObsticles.obsticlePattern;
             allLevels.Add(new LevelConfig(tempTar, tempObs));
         }
+    }
+    public void NewGame()
+    {
+        currentLevel = 0;
+        StartCoroutine("ResetFrameAfter");
+        mainMenuPanel.SetActive(false);
+    }
+    public void Continue()
+    {
+        StartCoroutine("ResetFrameAfter");
+        mainMenuPanel.SetActive(false);
     }
 }

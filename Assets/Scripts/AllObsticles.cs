@@ -70,16 +70,16 @@ public class AllObsticles : MonoBehaviour
         if(maxObsticles>xDim*yDim)maxObsticles=xDim*yDim;
         int count =0;
         obsticlePattern = new bool[xDim,yDim];
-         for (int i = 0; i < xDim; i++)
+        while(count<maxObsticles)
         {
-            for (int j = 0; j < yDim; j++)
+            ramdomAgain:
+            int i = Mathf.RoundToInt(Random.Range(0,xDim));
+            int j = Mathf.RoundToInt(Random.Range(0,yDim));
+            if(obsticlePattern[i,j]) goto ramdomAgain;
+            else
             {
-                if(Mathf.RoundToInt(Random.Range(0,1f)) == 1f) 
-                {
-                    obsticlePattern[i,j] = true;
-                    count++;
-                    if(count >= maxObsticles) return;
-                }
+                obsticlePattern[i,j] = true;
+                count++;
             }
         }
     }

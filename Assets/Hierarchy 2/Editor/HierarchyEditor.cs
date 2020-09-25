@@ -45,6 +45,7 @@ namespace Hierarchy2
         const string customIconDefaultTooltip = "M2-click: To customize";
 
         HierarchySettings settings;
+        HierarchyResources resources;
 
         HierarchySettings.ThemeData ThemeData
         {
@@ -85,6 +86,7 @@ namespace Hierarchy2
             AssetDatabase.importPackageCompleted += ImportPackageCompleted;
         }
 
+        static List<Type> InternalEditorType = new List<Type>();
         static Dictionary<string, Type> dicInternalEditorType = new Dictionary<string, Type>();
 
         static Type SceneHierarchyWindow;
@@ -106,7 +108,9 @@ namespace Hierarchy2
 
         static void InternalReflection()
         {
-            dicInternalEditorType = typeof(Editor).Assembly.GetTypes().ToDictionary(type => type.FullName);
+            var arrayInteralEditorType = typeof(Editor).Assembly.GetTypes();
+            InternalEditorType = arrayInteralEditorType.ToList();
+            dicInternalEditorType = arrayInteralEditorType.ToDictionary(type => type.FullName);
 
             FieldInfo refreshHierarchy = typeof(EditorApplication).GetField(nameof(refreshHierarchy),
                 BindingFlags.Static | BindingFlags.NonPublic);
@@ -182,6 +186,16 @@ namespace Hierarchy2
             IconSelectorShowAtPositionDelegate =
                 Delegate.CreateDelegate(typeof(Func<GameObject, Rect, bool, bool>), ShowAtPosition) as
                     Func<GameObject, Rect, bool, bool>;
+
+            GetItemAndRowIndexMethod = m_TreeView.FieldType.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+                .Single(method => method.Name == "GetItemAndRowIndex");
+            
+            m_TreeView_IData = m_TreeView.FieldType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Single(property => property.Name == "data");
+
+            m_Rows = InternalEditorType.Find(type => type.Name == "TreeViewDataSource")
+                .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+                .Single(field => field.Name.Contains(nameof(m_Rows)));
         }
 
         public static IEnumerable GetAllSceneHierarchyWindows() => GetAllSceneHierarchyWindowsDelegate();
@@ -191,6 +205,37 @@ namespace Hierarchy2
 
         public static bool IconSelectorShowAtPosition(GameObject gameObject, Rect rect, bool value) =>
             IconSelectorShowAtPositionDelegate(gameObject, rect, value);
+
+        private static MethodInfo GetItemAndRowIndexMethod;
+        private static PropertyInfo m_TreeView_IData;
+        private static FieldInfo m_Rows;
+        
+        internal static void ReplaceObjectIcon(int id, Texture icon)
+        {
+            // var row = -1;
+            // for (int i = 0; i < HierarchyWindow.windows.Count; ++i)
+            // {
+            //     var window = HierarchyWindow.windows[i];
+            //     if (window.editorWindow == null) continue;
+            //     var item = window.GetItemAndRowIndex(id, out row);
+            //     if (item == null) return;
+            //     item.icon = icon as Texture2D;
+            // }
+        }
+
+        [Obsolete]
+        internal static void HideNameObject(int id)
+        {
+            // var row = -1;
+            // for (int i = 0; i < HierarchyWindow.windows.Count; ++i)
+            // {
+            //     var window = HierarchyWindow.windows[i];
+            //     if (window.editorWindow == null) continue;
+            //     var item = window.GetItemAndRowIndex(id, out row);
+            //     if (item == null) return;
+            //     item.displayName = "";
+            // }
+        }
 
         static void OnRepaintHierarchyWindow()
         {
@@ -202,46 +247,17 @@ namespace Hierarchy2
             OnWindowsReorderedCallback?.Invoke();
         }
 
-        void SetObjectIconWidth(float value)
-        {
-            foreach (EditorWindow window in GetAllSceneHierarchyWindowsDelegate())
-            {
-                object gameObjectTreeViewGUIObject =
-                    gui.GetValue(m_TreeView.GetValue(m_SceneHierarchy.GetValue(window)));
-                k_IconWidth.SetValue(gameObjectTreeViewGUIObject, value);
-            }
-        }
-
-        GUIStyle selectionStyle;
-        Texture2D selectionImageOverride;
-
-        void OverrideSelectionColorStyle(Color color)
-        {
-            if (selectionStyle == null)
-            {
-                Type Styles = null;
-                dicInternalEditorType.TryGetValue(typeof(TreeView).FullName + nameof(GUI) + "+" + nameof(Styles),
-                    out Styles);
-                FieldInfo selectionStyleField = Styles.GetField(nameof(selectionStyle));
-                selectionStyle = selectionStyleField.GetValue(null) as GUIStyle;
-            }
-
-            selectionImageOverride = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            selectionImageOverride.SetPixel(0, 0, color);
-            selectionImageOverride.Apply();
-            selectionStyle.normal.background = selectionImageOverride;
-        }
-
         void EditorAwake()
         {
             settings = HierarchySettings.GetAssets();
-            if (settings is null)
-                return;
-
+            if (settings is null) return;
             OnSettingsChanged(nameof(settings.components));
-            OnSettingsChanged(nameof(settings.displayObjectIcon));
-
             settings.onSettingsChanged += OnSettingsChanged;
+
+            resources = HierarchyResources.GetAssets();
+            if (resources is null) return;
+            resources.GenerateKeyForAssets();
+
             EditorApplication.hierarchyWindowItemOnGUI += HierarchyOnGUI;
 
             if (settings.activeHierarchy)
@@ -260,14 +276,6 @@ namespace Hierarchy2
         {
             switch (param)
             {
-                case nameof(ThemeData.selectionColor):
-                    // OverrideSelectionColorStyle(ThemeData.selectionColor);
-                    break;
-
-                case nameof(settings.displayObjectIcon):
-                    SetObjectIconWidth(settings.displayObjectIcon ? 16 : 0);
-                    break;
-
                 case nameof(settings.components):
                     dicComponents.Clear();
                     foreach (string componentType in settings.components)
@@ -351,13 +359,25 @@ namespace Hierarchy2
         {
             if (checkingAllHierarchy == true)
             {
+                for (int i = 0; i < HierarchyWindow.windows.Count; ++i)
+                {
+                    if (HierarchyWindow.windows[i].editorWindow == null)
+                    {
+                        HierarchyWindow.windows[i].Dispose();
+                        --i;
+                    }
+                }
+                
                 foreach (EditorWindow window in GetAllSceneHierarchyWindowsDelegate())
                 {
-                    if (window.rootVisualElement.childCount == 0)
+                    if (!HierarchyWindow.instances.ContainsKey(window.GetInstanceID()))
                     {
-                        CreateCanvas(window);
-                        window.titleContent.text = "Hierarchy 2";
+                        var hierarchyWindow = new HierarchyWindow(window);
+                        hierarchyWindow.SetWindowTitle("Hierarchy 2");
                     }
+
+                    if (window.rootVisualElement.childCount == 0)
+                        CreateCanvas(window);
                 }
 
                 checkingAllHierarchy = false;
@@ -365,7 +385,6 @@ namespace Hierarchy2
 
             if (hierarchyChangedRequireUpdating == true)
             {
-                // OverrideSelectionColorStyle(ThemeData.selectionColor);
                 hierarchyChangedRequireUpdating = false;
             }
         }
@@ -411,10 +430,7 @@ namespace Hierarchy2
 
         void OnHierarchyChanged()
         {
-            if (selectionImageOverride == null)
-            {
-                hierarchyChangedRequireUpdating = true;
-            }
+            hierarchyChangedRequireUpdating = true;
         }
 
         void OnPrefabUpdated(GameObject prefab)
@@ -425,14 +441,17 @@ namespace Hierarchy2
 
         void OnPrefabStageOpened(PrefabStage stage)
         {
-            if (!settings.displayObjectIcon)
-                prefabStageChanged = true;
+            prefabStageChanged = true;
         }
 
         void OnPrefabStageClosing(PrefabStage stage)
         {
-            if (!settings.displayObjectIcon)
-                prefabStageChanged = true;
+            prefabStageChanged = true;
+            
+            for (int i = 0; i < HierarchyWindow.windows.Count; ++i)
+            {
+                HierarchyWindow.windows[i].Reflection();
+            }
         }
 
         internal HierarchyCanvas GetHierarchyCanvas()
@@ -513,7 +532,6 @@ namespace Hierarchy2
             {
                 if (prefabStageChanged)
                 {
-                    SetObjectIconWidth(settings.displayObjectIcon ? 16 : 0);
                     prefabStageChanged = false;
                 }
 
@@ -524,7 +542,7 @@ namespace Hierarchy2
 
             if (selectionStyleAfterInvoke == false && currentEvent.type == EventType.MouseDown)
             {
-                // OverrideSelectionColorStyle(ThemeData.selectionColor);
+
                 selectionStyleAfterInvoke = true;
             }
 
@@ -541,7 +559,10 @@ namespace Hierarchy2
 
             if (!rowItem.isNull)
             {
-                rowItem.isHeader = rowItem.name.Contains(settings.headerPrefix);
+                rowItem.hierarchyFolder = rowItem.gameObject.GetComponent<HierarchyFolder>();
+                if (!(rowItem.isFolder = rowItem.hierarchyFolder))
+                    rowItem.isHeader = rowItem.name.Contains(settings.headerPrefix);
+                
                 rowItem.isDirty = EditorUtility.IsDirty(selectionID);
 
                 if (true && !rowItem.isHeader && rowItem.isDirty)
@@ -628,8 +649,7 @@ namespace Hierarchy2
                 GUIStyle nameStyle = TreeStyleFromFont(FontStyle.Normal);
                 rowItem.nameRect.width = nameStyle.CalcSize(new GUIContent(rowItem.gameObject.name)).x;
 
-                if (settings.displayObjectIcon)
-                    rowItem.nameRect.x += 16;
+                rowItem.nameRect.x += 16;
 
                 var isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null ? true : false;
 
@@ -647,6 +667,13 @@ namespace Hierarchy2
                         DisplayRowBackground();
                 }
 
+                
+                if (rowItem.isFolder)
+                {
+                    var icon = rowItem.childCount > 0 ? Resources.FolderIcon : Resources.EmptyFolderIcon;
+                    DisplayCustomObjectIcon(icon);
+                }
+                
                 if (rowItem.isHeader && rowItem.isRootObject)
                 {
                     ElementAsHeader();
@@ -668,16 +695,13 @@ namespace Hierarchy2
                 if (settings.displayTreeView && !rowItem.isRootObject)
                     DisplayTreeView();
 
-                if (settings.displayObjectIcon && settings.displayCustomObjectIcon)
-                    DisplayCustomObjectIcon();
+                if (settings.displayCustomObjectIcon)
+                    DisplayCustomObjectIcon(null);
 
                 widthUse = WidthUse.zero;
                 widthUse.left += GLOBAL_SPACE_OFFSET_LEFT;
                 if (isPrefabMode) widthUse.left -= 2;
                 widthUse.afterName = rowItem.nameRect.x + rowItem.nameRect.width;
-
-                if (settings.displayDirtyTrack && rowItem.isDirty)
-                    DisplayDirtyTrack();
 
                 widthUse.afterName += settings.offSetIconAfterName;
 
@@ -791,6 +815,23 @@ namespace Hierarchy2
                 GUI.DrawTexture(rect, texture, ScaleMode.StretchToFill);
                 GUI.color = guiColor;
             }
+
+            if (rowItem.customRowItem.overrideLabel)
+            {
+                var rect = rowItem.nameRect;
+                rect.center += rowItem.customRowItem.labelOffset;
+                
+                Color guiColor = GUI.color;
+                var color = rowItem.customRowItem.labelColor;
+                if (!rowItem.gameObject.activeInHierarchy)
+                {
+                    rect.y += 1;
+                    color = Color.Lerp(color, Color.gray, .5f);
+                }
+                GUI.color = color;
+                GUI.Label(rect, rowItem.name, Styles.TreeLabel);
+                GUI.color = guiColor;
+            }
         }
 
         void ElementAsHeader()
@@ -798,13 +839,14 @@ namespace Hierarchy2
             if (currentEvent.type != EventType.Repaint)
                 return;
 
-            if (!rowItem.gameObject.CompareTag("Untagged"))
-                rowItem.gameObject.tag = "Untagged";
+            if (!rowItem.gameObject.CompareTag(settings.headerDefaultTag))
+                rowItem.gameObject.tag = settings.headerDefaultTag;
 
             var rect = EditorGUIUtility.PixelsToPoints(RectFromLeft(rowItem.rect, Screen.width, 0));
             rect.y = rowItem.rect.y;
             rect.height = rowItem.rect.height;
             rect.x += GLOBAL_SPACE_OFFSET_LEFT;
+            rect.width -= GLOBAL_SPACE_OFFSET_LEFT;
 
             Color guiColor = GUI.color;
             GUI.color = ThemeData.colorHeaderBackground;
@@ -881,7 +923,7 @@ namespace Hierarchy2
                 ApplyStaticTargetAndChild(target.GetChild(i), value);
         }
 
-        void DisplayCustomObjectIcon()
+        void DisplayCustomObjectIcon(Texture icon)
         {
             var rect = RectFromRight(rowItem.nameRect, 16, rowItem.nameRect.width + 1);
             rect.height = 16;
@@ -900,48 +942,21 @@ namespace Hierarchy2
                     GUI.Box(rect, new GUIContent("", customIconDefaultTooltip), GUIStyle.none);
                 }
 
-                Texture2D icon = AssetPreview.GetMiniThumbnail(rowItem.gameObject);
-
-                if (icon.name == "GameObject Icon" || icon.name == "d_GameObject Icon" || icon.name == "Prefab Icon" ||
-                    icon.name == "d_Prefab Icon" || icon.name == "PrefabModel Icon" ||
-                    icon.name == "d_PrefabModel Icon")
-                    return;
-
+                if (icon == null)
+                {
+                    icon = AssetPreview.GetMiniThumbnail(rowItem.gameObject);
+                    if (icon.name == "GameObject Icon" || icon.name == "d_GameObject Icon" || icon.name == "Prefab Icon" ||
+                        icon.name == "d_Prefab Icon" || icon.name == "PrefabModel Icon" ||
+                        icon.name == "d_PrefabModel Icon")
+                        return;
+                }
+                
                 Color guiColor = GUI.color;
                 GUI.color = rowItem.rowIndex % 2 != 0 ? ThemeData.colorRowEven : ThemeData.colorRowOdd;
                 GUI.DrawTexture(rect, Resources.PixelWhite);
                 GUI.color = guiColor;
                 GUI.DrawTexture(rect, icon, ScaleMode.ScaleToFit);
-            }
-        }
-
-
-        void DisplayDirtyTrack()
-        {
-            var rect = RectFromLeft(rowItem.nameRect, 7, ref widthUse.afterName);
-
-            if (currentEvent.type == EventType.Repaint)
-            {
-                GUIStyle style;
-
-                if (rowItem.gameObject.activeSelf)
-                {
-                    if (rowItem.isPrefab)
-                        style = rowItem.isPrefabMissing ? Styles.PR_BrokenPrefabLabel : Styles.PR_PrefabLabel;
-                    else
-                        style = Styles.lineStyle;
-                }
-                else
-                {
-                    if (rowItem.isPrefab)
-                        style = rowItem.isPrefabMissing
-                            ? Styles.PR_DisabledBrokenPrefabLabel
-                            : Styles.PR_DisabledPrefabLabel;
-                    else
-                        style = Styles.PR_DisabledLabel;
-                }
-
-                style.Draw(rect, "*", false, false, rowItem.isSelected, true);
+                //ReplaceObjectIcon(rowItem.ID, icon);
             }
         }
 
@@ -1446,11 +1461,11 @@ namespace Hierarchy2
 
             if (t.childCount == 1 || t.GetChild(t.childCount - 1) == rowItem.gameObject.transform)
             {
-                GUI.DrawTexture(rect, Resources.TreeTRIcon, ScaleMode.ScaleToFit);
+                GUI.DrawTexture(rect, resources.GetIcon("icon_branch_L"), ScaleMode.ScaleToFit);
             }
             else
             {
-                GUI.DrawTexture(rect, Resources.TreeTRDIcon, ScaleMode.ScaleToFit);
+                GUI.DrawTexture(rect, resources.GetIcon("icon_branch_T"), ScaleMode.ScaleToFit);
             }
 
             while (t != null)
@@ -1466,7 +1481,7 @@ namespace Hierarchy2
                 }
 
                 rect.x -= 14;
-                GUI.DrawTexture(rect, Resources.TreeTDIcon, ScaleMode.ScaleToFit);
+                GUI.DrawTexture(rect, resources.GetIcon("icon_branch_I"), ScaleMode.ScaleToFit);
                 t = t.parent;
             }
 
@@ -1607,6 +1622,62 @@ namespace Hierarchy2
             }
         }
 
+        sealed class HierarchyWindow
+        {
+            public static Dictionary<int, EditorWindow> instances = new Dictionary<int, EditorWindow>();
+            public static List<HierarchyWindow> windows = new List<HierarchyWindow>();
+
+            public int instanceID = Int32.MinValue;
+            public EditorWindow editorWindow;
+            public object treeview;
+
+            public HierarchyWindow(EditorWindow editorWindow)
+            {
+                this.editorWindow = editorWindow;
+                
+                instanceID = this.editorWindow.GetInstanceID();
+                
+                instances.Add(instanceID, this.editorWindow);
+                windows.Add(this);
+                
+                // Debug.Log(string.Format("HierarchyWindow {0} Instanced.", instanceID));
+
+                Reflection();
+            }
+
+            public void Reflection()
+            {
+                // treeview = m_TreeView.GetValue(m_SceneHierarchy.GetValue(editorWindow));
+            }
+            
+            public void Dispose()
+            {
+                editorWindow = null;
+                treeview = null;
+                instances.Remove(instanceID);
+                windows.Remove(this);
+                
+                // Debug.Log(string.Format("HierarchyWindow {0} Disposed.", instanceID));
+            }
+
+            public TreeViewItem GetItemAndRowIndex(int id, out int row)
+            {
+                row = -1;
+                // if (treeview == null) return null;
+                // var item = GetItemAndRowIndexMethod.Invoke(treeview, new object[] {id, row}) as TreeViewItem;
+                // return item;
+                return null;
+            }
+
+            public void SetWindowTitle(string value)
+            {
+                if (editorWindow == null)
+                    return;
+
+                editorWindow.titleContent.text = value;
+            }
+        }
+        
         sealed class RowItem
         {
             public int ID = int.MinValue;
@@ -1622,10 +1693,12 @@ namespace Hierarchy2
             public bool isFirstRow = false;
             public bool isFirstElement = false;
             public bool isHeader = false;
+            public bool isFolder = false;
             public bool isDirty = false;
             public bool isMouseHovering = false;
             public bool hasCustom = false;
             public CustomRowItem customRowItem;
+            public HierarchyFolder hierarchyFolder;
 
             public string name
             {
@@ -1664,6 +1737,7 @@ namespace Hierarchy2
                 isFirstRow = false;
                 isFirstElement = false;
                 isHeader = false;
+                isFolder = false;
                 isDirty = false;
                 isMouseHovering = false;
                 hasCustom = false;
@@ -1690,6 +1764,25 @@ namespace Hierarchy2
                 }
             }
 
+            private static Texture2D alphaTexture;
+
+            public static Texture2D AlphaTexture
+            {
+                get
+                {
+                    if (alphaTexture == null)
+                    {
+                        alphaTexture = new Texture2D(16, 16, TextureFormat.RGBA32, false);
+                        for (int x = 0; x < 16; ++x)
+                        for (int y = 0; y < 16; ++y)
+                            alphaTexture.SetPixel(x, y, Color.clear);
+                        alphaTexture.Apply();
+                    }
+
+                    return alphaTexture;
+                }
+            }
+
             private static Texture2D ramp8x8White;
 
             public static Texture2D Ramp8x8White
@@ -1713,86 +1806,31 @@ namespace Hierarchy2
                 }
             }
 
-            private static Texture2D treeTRDIcon;
-
-            public static Texture2D TreeTRDIcon
-            {
-                get
-                {
-                    if (treeTRDIcon == null)
-                        treeTRDIcon = new byte[]
-                        {
-                            137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
-                            35, 0, 0, 0, 35, 8, 6, 0, 0, 0, 30, 217, 179, 89, 0, 0, 0, 116, 73, 68, 65, 84, 88, 9, 237,
-                            214, 177,
-                            14, 128, 32, 12, 69, 81, 49, 254, 255, 47, 171, 65, 72, 238, 192, 91, 165, 195, 101, 225,
-                            165, 11, 205,
-                            105, 7, 218, 253, 158, 227, 59, 109, 220, 219, 174, 115, 219, 203, 139, 135, 109, 102, 129,
-                            210, 75, 202, 40,
-                            147, 4, 82, 221, 157, 81, 38, 9, 164, 186, 59, 163, 76, 18, 72, 245, 82, 59, 115, 161, 203,
-                            249, 201, 66, 233, 223,
-                            88, 86, 198, 111, 39, 23, 161, 212, 152, 108, 134, 163, 97, 86, 134, 26, 204, 202, 80, 131,
-                            89, 25, 106, 48, 43, 67, 13,
-                            102, 101, 168, 193, 92, 74, 230, 1, 149, 182, 5, 71, 91, 165, 185, 13, 0, 0, 0, 0, 73, 69,
-                            78, 68, 174, 66, 96, 130
-                        }.PNGImageDecode();
-                    return treeTRDIcon;
-                }
-            }
-
-            private static Texture2D treeTRIcon;
-
-            public static Texture2D TreeTRIcon
-            {
-                get
-                {
-                    if (treeTRIcon == null)
-                        treeTRIcon = new byte[]
-                        {
-                            137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 35,
-                            0, 0, 0, 35, 8, 6, 0, 0, 0, 30, 217, 179, 89, 0, 0, 0, 119, 73, 68, 65, 84, 88, 9, 237, 214,
-                            49, 14, 128,
-                            48, 12, 67, 81, 138, 184, 255, 149, 1, 1, 150, 42, 171, 94, 73, 134, 223, 197, 36, 75, 163,
-                            71, 134, 142, 243,
-                            62, 219, 123, 198, 151, 101, 177, 151, 221, 188, 184, 152, 97, 22, 40, 79, 11, 25, 100, 146,
-                            64, 234, 179, 51, 200,
-                            36, 129, 212, 103, 103, 144, 73, 2, 169, 223, 106, 103, 142, 105, 74, 61, 178, 166, 214,
-                            191, 159, 237, 100, 202, 159,
-                            155, 242, 111, 37, 195, 48, 250, 45, 158, 200, 184, 136, 106, 100, 36, 225, 137, 140, 139,
-                            168, 70, 70, 18, 158, 200, 184,
-                            136, 106, 100, 36, 225, 121, 1, 149, 190, 5, 71, 8, 114, 89, 2, 0, 0, 0, 0, 73, 69, 78, 68,
-                            174, 66, 96, 130
-                        }.PNGImageDecode();
-                    return treeTRIcon;
-                }
-            }
-
-            private static Texture2D treeTDIcon;
-
-            public static Texture2D TreeTDIcon
-            {
-                get
-                {
-                    if (treeTDIcon == null)
-                        treeTDIcon = new byte[]
-                        {
-                            137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 35, 0,
-                            0, 0, 35, 8, 6, 0, 0, 0, 30, 217, 179, 89, 0, 0, 0, 90, 73, 68, 65, 84, 88, 9, 237, 210, 65,
-                            10, 128, 32,
-                            0, 69, 193, 236, 254, 119, 174, 200, 150, 190, 181, 4, 227, 70, 120, 27, 101, 248, 227, 122,
-                            206, 49, 207,
-                            248, 238, 109, 215, 185, 237, 229, 197, 195, 62, 179, 64, 121, 19, 25, 50, 37, 80, 221, 102,
-                            200, 148, 64, 117,
-                            155, 33, 83, 2, 213, 109, 134, 76, 9, 84, 183, 25, 50, 37, 80, 221, 102, 200, 148, 64, 117,
-                            155, 33, 83, 2, 213,
-                            109, 230, 23, 50, 55, 146, 198, 4, 67, 142, 224, 65, 199, 0, 0, 0, 0, 73, 69, 78, 68, 174,
-                            66, 96, 130
-                        }.PNGImageDecode();
-                    return treeTDIcon;
-                }
-            }
-
             internal static readonly Texture lockIconOn = EditorGUIUtility.IconContent("LockIcon-On").image;
+
+            private static Texture folderIcon;
+            
+            public static Texture FolderIcon
+            {
+                get
+                {
+                    if (folderIcon == null)
+                        folderIcon = EditorGUIUtility.IconContent("Folder Icon").image;
+                    return folderIcon;
+                }
+            }
+
+            private static Texture emptyFolderIcon;
+            
+            public static Texture EmptyFolderIcon
+            {
+                get
+                {
+                    if (emptyFolderIcon == null)
+                        emptyFolderIcon = EditorGUIUtility.IconContent("FolderEmpty Icon").image;
+                    return emptyFolderIcon;
+                }
+            }
         }
 
         internal static class Styles
@@ -1848,10 +1886,11 @@ namespace Hierarchy2
                 get { return TreeView.DefaultStyles.boldLabel; }
             }
 
-            internal static GUIStyle TreeLabel
+            internal static GUIStyle TreeLabel = new GUIStyle(TreeView.DefaultStyles.label)
             {
-                get { return TreeView.DefaultStyles.label; }
-            }
+                richText = true,
+                normal = new GUIStyleState() {textColor = Color.white}
+            };
         }
 
         internal sealed class MenuCommand
@@ -1925,6 +1964,9 @@ namespace Hierarchy2
 
             [MenuItem("GameObject/Move Selection Down #s", true, priority)]
             static bool ValidateQuickSiblingDown() => Selection.activeTransform != null;
+            
+            [MenuItem("GameObject/Header (Separator)", priority = 0)]
+            static void CreateHeaderInstance() => new GameObject(string.Format("{0}Header", HierarchyEditor.instance.settings.headerPrefix));
         }
     }
 }

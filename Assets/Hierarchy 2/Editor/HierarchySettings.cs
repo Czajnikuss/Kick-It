@@ -109,7 +109,6 @@ namespace Hierarchy2
         [HideInInspector] public bool autoCreateHLD = true;
         [HideInInspector] public bool pingHierarchyLocalDataObject = false;
         [HideInInspector] public bool displayVersion = true;
-        public bool displayObjectIcon = true;
         public bool displayCustomObjectIcon = true;
         public bool displayTreeView = true;
         public bool displayRowBackground = true;
@@ -140,7 +139,7 @@ namespace Hierarchy2
         public bool applyTagTargetAndChild = false;
         public bool applyLayerTargetAndChild = true;
         public string headerPrefix = "$h";
-        public bool displayDirtyTrack = false;
+        public string headerDefaultTag = "Untagged";
         public bool onlyDisplayWhileMouseEnter = false;
         public ContentDisplay contentDisplay = ContentDisplay.Component | ContentDisplay.Tag | ContentDisplay.Layer;
 
@@ -180,8 +179,8 @@ namespace Hierarchy2
                     Editor editor = Editor.CreateEditor(GetAssets());
                     var settings = editor.target as HierarchySettings;
 
-                    float TITLE_MARGIN_TOP = 10;
-                    float TITLE_MARGIN_BOTTOM = 4;
+                    float TITLE_MARGIN_TOP = 14;
+                    float TITLE_MARGIN_BOTTOM = 8;
                     float CONTENT_MARGIN_LEFT = 10;
 
                     Label hierarchyTitle = new Label("Hierarchy");
@@ -198,104 +197,72 @@ namespace Hierarchy2
                     verticalLayout.StylePadding(8, 8, 8, 8);
                     scrollView.Add(verticalLayout);
 
-                    Label Object = new Label("Object");
+                    var Object = new Label("Object");
                     Object.StyleFont(FontStyle.Bold);
-                    Object.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
+                    Object.StyleMargin(0, 0, 0, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(Object);
 
-                    Hierarchy2.Toggle displayObjectIcon = new Hierarchy2.Toggle("Display Object Icon",
-                        settings.displayObjectIcon,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.displayObjectIcon = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.displayObjectIcon));
-                        });
-                    displayObjectIcon.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    verticalLayout.Add(displayObjectIcon);
-
-                    Hierarchy2.Toggle displayCustomObjectIcon = new Hierarchy2.Toggle("Display Custom Icon",
-                        settings.displayCustomObjectIcon,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.displayCustomObjectIcon = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.displayCustomObjectIcon));
-                        });
-                    displayCustomObjectIcon.StyleMarginLeft(CONTENT_MARGIN_LEFT * 2);
-                    verticalLayout.Add(displayCustomObjectIcon);
-                    displayCustomObjectIcon.StyleDisplay(settings.displayObjectIcon);
-                    displayObjectIcon.RegisterValueChangedCallback((evt) =>
+                    var displayCustomObjectIcon = new Toggle("Display Custom Icon");
+                    displayCustomObjectIcon.value = settings.displayCustomObjectIcon;
+                    displayCustomObjectIcon.RegisterValueChangedCallback((evt) =>
                     {
-                        displayCustomObjectIcon.StyleDisplay(evt.newValue);
+                        settings.displayCustomObjectIcon = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.displayCustomObjectIcon));
                     });
+                    displayCustomObjectIcon.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    verticalLayout.Add(displayCustomObjectIcon);
 
-                    Hierarchy2.Toggle displayDirtyTrack = new Hierarchy2.Toggle("Display Dirty Track [EXPERIMENTAL]",
-                        settings.displayDirtyTrack,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.displayDirtyTrack = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.displayDirtyTrack));
-                        });
-                    displayDirtyTrack.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    verticalLayout.Add(displayDirtyTrack);
-
-                    Label View = new Label("View");
+                    var View = new Label("View");
                     View.StyleFont(FontStyle.Bold);
                     View.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(View);
 
-                    Hierarchy2.Toggle displayRowBackground = new Hierarchy2.Toggle("Display RowBackground",
-                        settings.displayRowBackground,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.displayRowBackground = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.displayRowBackground));
-                        });
+                    var displayRowBackground = new Toggle("Display RowBackground");
+                    displayRowBackground.value = settings.displayRowBackground;
+                    displayRowBackground.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.displayRowBackground = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.displayRowBackground));
+                    });
                     displayRowBackground.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayRowBackground);
 
-                    Hierarchy2.Toggle displayTreeView = new Hierarchy2.Toggle("Display TreeView",
-                        settings.displayTreeView,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.displayTreeView = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.displayTreeView));
-                        });
+                    var displayTreeView = new Toggle("Display TreeView");
+                    displayTreeView.value = settings.displayTreeView;
+                    displayTreeView.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.displayTreeView = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.displayTreeView));
+                    });
                     displayTreeView.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayTreeView);
 
-                    Hierarchy2.Toggle displayGrid = new Hierarchy2.Toggle("Display Grid",
-                        settings.displayGrid,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.displayGrid = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.displayGrid));
-                        });
+                    var displayGrid = new Toggle("Display Grid");
+                    displayGrid.value = settings.displayGrid;
+                    displayGrid.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.displayGrid = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.displayGrid));
+                    });
                     displayGrid.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayGrid);
 
-                    Label Components = new Label("Components");
+                    var Components = new Label("Components");
                     Components.StyleFont(FontStyle.Bold);
                     Components.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(Components);
 
-                    Hierarchy2.Toggle displayComponents = new Hierarchy2.Toggle("Display Components Icon",
-                        settings.displayComponents,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.displayComponents = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.displayComponents));
-                        });
+                    var displayComponents = new Toggle("Display Components Icon");
+                    displayComponents.value = settings.displayComponents;
+                    displayComponents.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.displayComponents = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.displayComponents));
+                    });
                     displayComponents.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayComponents);
 
-                    EnumField componentAlignment = new EnumField(settings.componentAlignment);
+                    var componentAlignment = new EnumField(settings.componentAlignment);
                     componentAlignment.label = "Component Alignment";
                     componentAlignment.RegisterValueChangedCallback((evt) =>
                     {
@@ -305,12 +272,12 @@ namespace Hierarchy2
                     componentAlignment.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(componentAlignment);
 
-                    EnumField componentDisplayMode = new EnumField(settings.componentDisplayMode);
+                    var componentDisplayMode = new EnumField(settings.componentDisplayMode);
                     componentDisplayMode.label = "Component Display Mode";
                     componentDisplayMode.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(componentDisplayMode);
 
-                    TextField componentListInput = new TextField();
+                    var componentListInput = new TextField("Components");
                     componentListInput.value = string.Join(" ", settings.components);
                     componentListInput.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(componentListInput);
@@ -360,7 +327,7 @@ namespace Hierarchy2
                             break;
                     }
 
-                    EnumField componentSize = new EnumField(componentSizeEnum);
+                    var componentSize = new EnumField(componentSizeEnum);
                     componentSize.label = "Component Size";
                     componentSize.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     componentSize.RegisterValueChangedCallback((evt) =>
@@ -384,7 +351,7 @@ namespace Hierarchy2
                     });
                     verticalLayout.Add(componentSize);
 
-                    IntegerField componentSpacing = new IntegerField();
+                    var componentSpacing = new IntegerField();
                     componentSpacing.label = "Component Spacing";
                     componentSpacing.value = settings.componentSpacing;
                     componentSpacing.StyleMarginLeft(CONTENT_MARGIN_LEFT);
@@ -395,35 +362,32 @@ namespace Hierarchy2
                     });
                     verticalLayout.Add(componentSpacing);
 
-                    Label TagAndLayer = new Label("Tag And Layer");
+                    var TagAndLayer = new Label("Tag And Layer");
                     TagAndLayer.StyleFont(FontStyle.Bold);
                     TagAndLayer.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(TagAndLayer);
 
-                    Hierarchy2.Toggle displayTag = new Hierarchy2.Toggle("Display Tag",
-                        settings.displayTag,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.displayTag = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.displayTag));
-                        });
+                    var displayTag = new Toggle("Display Tag");
+                    displayTag.value = settings.displayTag;
+                    displayTag.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.displayTag = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.displayTag));
+                    });
                     displayTag.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayTag);
 
-                    Hierarchy2.Toggle applyTagTargetAndChild = new Hierarchy2.Toggle(
-                        "Apply Child Tag When Parent Tag Change",
-                        settings.applyTagTargetAndChild,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.applyTagTargetAndChild = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.applyTagTargetAndChild));
-                        });
+                    var applyTagTargetAndChild = new Toggle("Tag Recursive Change");
+                    applyTagTargetAndChild.value = settings.applyTagTargetAndChild;
+                    applyTagTargetAndChild.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.applyTagTargetAndChild = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.applyTagTargetAndChild));
+                    });
                     applyTagTargetAndChild.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(applyTagTargetAndChild);
 
-                    EnumField tagAlignment = new EnumField(settings.tagAlignment);
+                    var tagAlignment = new EnumField(settings.tagAlignment);
                     tagAlignment.label = "Tag Alignment";
                     tagAlignment.RegisterValueChangedCallback((evt) =>
                     {
@@ -433,30 +397,28 @@ namespace Hierarchy2
                     tagAlignment.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(tagAlignment);
 
-                    Hierarchy2.Toggle displayLayer = new Hierarchy2.Toggle("Display Layer",
-                        settings.displayLayer,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.displayLayer = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.displayLayer));
-                        });
+                    var displayLayer = new Toggle("Display Layer");
+                    displayLayer.value = settings.displayLayer;
+                    displayLayer.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.displayLayer = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.displayLayer));
+                    });
+                    displayLayer.style.marginTop = 8;
                     displayLayer.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayLayer);
 
-                    Hierarchy2.Toggle applyLayerTargetAndChild = new Hierarchy2.Toggle(
-                        "Apply Child Layer When Parent Layer Change",
-                        settings.applyLayerTargetAndChild,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.applyLayerTargetAndChild = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.applyLayerTargetAndChild));
-                        });
+                    var applyLayerTargetAndChild = new Toggle("Layer Recursive Change");
+                    applyLayerTargetAndChild.value = settings.applyLayerTargetAndChild;
+                    applyLayerTargetAndChild.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.applyLayerTargetAndChild = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.applyLayerTargetAndChild));
+                    });
                     applyLayerTargetAndChild.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(applyLayerTargetAndChild);
 
-                    EnumField layerAlignment = new EnumField(settings.layerAlignment);
+                    var layerAlignment = new EnumField(settings.layerAlignment);
                     layerAlignment.label = "Layer Alignment";
                     layerAlignment.RegisterValueChangedCallback((evt) =>
                     {
@@ -466,24 +428,47 @@ namespace Hierarchy2
                     layerAlignment.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(layerAlignment);
 
-                    Label advanced = new Label("Advanced");
+                    var advanced = new Label("Advanced");
                     advanced.StyleFont(FontStyle.Bold);
                     advanced.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(advanced);
 
-                    Hierarchy2.Toggle onlyDisplayWhileMouseHovering = new Hierarchy2.Toggle(
-                        "Only Display While Mouse Hovering",
-                        settings.onlyDisplayWhileMouseEnter,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.onlyDisplayWhileMouseEnter = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.onlyDisplayWhileMouseEnter));
-                        });
+                    var headerPrefix = new TextField();
+                    headerPrefix.label = "Header Prefix";
+                    headerPrefix.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    headerPrefix.value = settings.headerPrefix;
+                    headerPrefix.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.headerPrefix = evt.newValue == String.Empty ? "$h" : evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.headerPrefix));
+                    });
+                    verticalLayout.Add(headerPrefix);
+                    
+                    
+                    var headerDefaultTag = new TagField();
+                    headerDefaultTag.label = "Header Default Tag";
+                    headerDefaultTag.value = settings.headerDefaultTag;
+                    headerDefaultTag.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.headerDefaultTag = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.headerDefaultTag));
+                    });
+                    headerDefaultTag.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    headerDefaultTag.StyleMarginBottom(4);
+                    verticalLayout.Add(headerDefaultTag);
+
+                    var onlyDisplayWhileMouseHovering = new Toggle("Display Hovering");
+                    onlyDisplayWhileMouseHovering.tooltip = "Only display while mouse hovering";
+                    onlyDisplayWhileMouseHovering.value = settings.onlyDisplayWhileMouseEnter;
+                    onlyDisplayWhileMouseHovering.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.onlyDisplayWhileMouseEnter = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.onlyDisplayWhileMouseEnter));
+                    });
                     onlyDisplayWhileMouseHovering.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(onlyDisplayWhileMouseHovering);
 
-                    EnumFlagsField contentMaskEnumFlags = new EnumFlagsField(settings.contentDisplay);
+                    var contentMaskEnumFlags = new EnumFlagsField(settings.contentDisplay);
                     contentMaskEnumFlags.StyleDisplay(onlyDisplayWhileMouseHovering.value);
                     contentMaskEnumFlags.label = "Content Mask";
                     onlyDisplayWhileMouseHovering.RegisterValueChangedCallback((evt) =>
@@ -495,9 +480,10 @@ namespace Hierarchy2
                         settings.contentDisplay = (ContentDisplay) evt.newValue;
                         settings.OnSettingsChanged(nameof(settings.contentDisplay));
                     });
+                    contentMaskEnumFlags.style.marginLeft = CONTENT_MARGIN_LEFT;
                     verticalLayout.Add(contentMaskEnumFlags);
 
-                    Label Theme = new Label("Theme");
+                    var Theme = new Label("Theme");
                     Theme.StyleFont(FontStyle.Bold);
                     Theme.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(Theme);
@@ -655,21 +641,6 @@ namespace Hierarchy2
                             settings.OnSettingsChanged();
                         });
                         verticalLayout.Add(comSelBGColor);
-
-                        // ColorField selectionColor = new ColorField("Selection");
-                        // selectionColor.value = settings.usedTheme.selectionColor;
-                        // selectionColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                        // selectionColor.RegisterValueChangedCallback((evt) =>
-                        // {
-                        //     if (EditorGUIUtility.isProSkin)
-                        //         settings.professionalTheme.selectionColor = evt.newValue;
-                        //     else
-                        //         settings.personalTheme.selectionColor = evt.newValue;
-                        //
-                        //     selectionColorHelpBox.StyleDisplay(true);
-                        //     settings.OnSettingsChanged();
-                        // });
-                        // verticalLayout.Add(selectionColor);
                     }
                 },
 

@@ -125,6 +125,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62273fc9c52641b4780126d8b8843bc9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  setAblaze: 1
+  freeze: 0
   playManager: {fileID: 0}
   rigidbody: {fileID: 4294778260870070486}
   magnitude: 100

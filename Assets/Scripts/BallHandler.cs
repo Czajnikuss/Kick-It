@@ -6,6 +6,7 @@ using TalionApps.Utils;
 [RequireComponent(typeof (Rigidbody))]
 public class BallHandler : MonoBehaviour
 {
+    public bool setAblaze, freeze;
     public PlayManager playManager;
     public Rigidbody rigidbody;
     float startDrag;
