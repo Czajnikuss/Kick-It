@@ -8,11 +8,13 @@ public class LevelConfig
     public static int xTarg = 5, yTarg = 4;
     public bool[,] targetPattern;
     public static int xObs = 4, yObs = 3;
-    public bool[,] obsticlePattern; 
-    public LevelConfig(bool[,] targetPatern, bool[,] obsticlePattern)
+    public bool[,] obsticlePattern;
+    public ObsticleMovementType levelObsticlesMovementType; 
+    public LevelConfig(bool[,] targetPatern, bool[,] obsticlePattern, ObsticleMovementType movementType)
     {
         this.targetPattern = targetPatern;
         this.obsticlePattern = obsticlePattern;
+        this.levelObsticlesMovementType = movementType;
         xTarg = 5;
         yTarg = 4;
         xObs = 4;
@@ -79,7 +81,7 @@ public class PlayManager : MonoBehaviour
         while(true)
         {
             yield return new WaitForSeconds(0.5f);
-            if(ball.rigidbody.velocity.magnitude<=1.5f)
+            if(ball.rigidbodyThis.velocity.magnitude<=1.5f)
             {
                 ball.gameObject.SetActive(false);
             }
@@ -96,8 +98,8 @@ public class PlayManager : MonoBehaviour
         movesPossible = true;
         ball.gameObject.SetActive(true);
         ball.transform.position = ball.startPos;
-        ball.rigidbody.velocity =  Vector3.zero;
-        ball.rigidbody.angularVelocity = Vector3.zero;
+        ball.rigidbodyThis.velocity =  Vector3.zero;
+        ball.rigidbodyThis.angularVelocity = Vector3.zero;
     }
     public void ResetToRandom()
     {
@@ -107,9 +109,10 @@ public class PlayManager : MonoBehaviour
         ball.gameObject.SetActive(true);
         ball.transform.position = ball.startPos;
 
-        ball.rigidbody.velocity =  Vector3.zero;
-        ball.rigidbody.angularVelocity = Vector3.zero;
+        ball.rigidbodyThis.velocity =  Vector3.zero;
+        ball.rigidbodyThis.angularVelocity = Vector3.zero;
         allObsticles.RandomizeObsticles();
+        allObsticles.levelObsticleMovmentType = (ObsticleMovementType)(int)Random.Range(0, 3);
         allObsticles.SetObsticles();
         allTargets.RandomizeTargets();
         allTargets.SetTargets();
@@ -135,10 +138,11 @@ public class PlayManager : MonoBehaviour
         ball.gameObject.SetActive(true);
         ball.transform.position = ball.startPos;
 
-        ball.rigidbody.velocity =  Vector3.zero;
-        ball.rigidbody.angularVelocity = Vector3.zero;
+        ball.rigidbodyThis.velocity =  Vector3.zero;
+        ball.rigidbodyThis.angularVelocity = Vector3.zero;
         
         allObsticles.obsticlePattern = allLevels[levelIndex].obsticlePattern;
+        allObsticles.levelObsticleMovmentType = allLevels[levelIndex].levelObsticlesMovementType;
         allObsticles.SetObsticles();
         allTargets.targetPattern = allLevels[levelIndex].targetPattern;
         allTargets.targetsSet = false;
@@ -163,10 +167,11 @@ public class PlayManager : MonoBehaviour
         ball.gameObject.SetActive(true);
         ball.transform.position = ball.startPos;
 
-        ball.rigidbody.velocity =  Vector3.zero;
-        ball.rigidbody.angularVelocity = Vector3.zero;
+        ball.rigidbodyThis.velocity =  Vector3.zero;
+        ball.rigidbodyThis.angularVelocity = Vector3.zero;
         
         allObsticles.obsticlePattern = allLevels[currentLevel].obsticlePattern;
+        allObsticles.levelObsticleMovmentType = allLevels[currentLevel].levelObsticlesMovementType;
         allObsticles.SetObsticles();
         allTargets.targetPattern = allLevels[currentLevel].targetPattern;
         allTargets.targetsSet = false;
@@ -285,19 +290,25 @@ public class PlayManager : MonoBehaviour
     public void CreateLevelsList(int numerOfLevels)
     {
         bool[,] tempObs = new bool[LevelConfig.xObs, LevelConfig.yObs], tempTar = new bool[LevelConfig.xTarg, LevelConfig.yTarg];
+        ObsticleMovementType levelObsticleMovementType = ObsticleMovementType.None;
         for (int i = 0; i < numerOfLevels; i++)
         {
             allTargets.RandomizeTargets(Mathf.RoundToInt(i/10f)+1);
             tempTar = allTargets.targetPattern;
             allObsticles.RandomizeObsticles((int)Mathf.Floor(i/10f));
             tempObs = allObsticles.obsticlePattern;
-            allLevels.Add(new LevelConfig(tempTar, tempObs));
+            if(i<= 10) levelObsticleMovementType = ObsticleMovementType.None;
+            else if(i>10) levelObsticleMovementType = ObsticleMovementType.OnlyY;
+            
+            else if(i>20) levelObsticleMovementType = ObsticleMovementType.OnlyZ;
+            else if(i>30) levelObsticleMovementType = ObsticleMovementType.Ramdom;
+            allLevels.Add(new LevelConfig(tempTar, tempObs, levelObsticleMovementType));
         }
     }
     public void NewGame()
     {
         currentLevel = 0;
-        StartCoroutine("ResetFrameAfter");
+        StartCoroutine(ResetFrameAfter());
         mainMenuPanel.SetActive(false);
     }
     public void Continue()

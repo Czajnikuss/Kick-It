@@ -64,6 +64,11 @@ dependencies {
     implementation 'com.explorestack.ogury:sdk:4.7.2' // Assets/Appodeal/Editor/AppodealDependencies.xml:43
     implementation 'com.explorestack:iab:0.5.6' // Assets/Appodeal/Editor/AppodealDependencies.xml:13
     implementation 'com.facebook.android:audience-network-sdk:5.7.1' // Assets/Appodeal/Editor/AppodealDependencies.xml:49
+    implementation 'com.facebook.android:facebook-applinks:[7.1.0, 8)' // Assets/FacebookSDK/Plugins/Editor/Dependencies.xml:6
+    implementation 'com.facebook.android:facebook-core:[7.1.0, 8)' // Assets/FacebookSDK/Plugins/Editor/Dependencies.xml:5
+    implementation 'com.facebook.android:facebook-gamingservices:[7.1.0, 8)' // Assets/FacebookSDK/Plugins/Editor/Dependencies.xml:9
+    implementation 'com.facebook.android:facebook-login:[7.1.0, 8)' // Assets/FacebookSDK/Plugins/Editor/Dependencies.xml:7
+    implementation 'com.facebook.android:facebook-share:[7.1.0, 8)' // Assets/FacebookSDK/Plugins/Editor/Dependencies.xml:8
     implementation 'com.google.android.exoplayer:exoplayer-core:2.8.4@aar' // Assets/Appodeal/Editor/AppodealDependencies.xml:33
     implementation 'com.google.android.exoplayer:exoplayer-hls:2.8.4@aar' // Assets/Appodeal/Editor/AppodealDependencies.xml:32
     implementation 'com.google.android.gms:play-services-ads:16.0.0' // Assets/Appodeal/Editor/AppodealDependencies.xml:37
@@ -74,6 +79,7 @@ dependencies {
     implementation 'com.inmobi.monetization:inmobi-ads:7.3.0' // Assets/Appodeal/Editor/AppodealDependencies.xml:23
     implementation 'com.ironsource.sdk:mediationsdk:6.16.0' // Assets/Appodeal/Editor/AppodealDependencies.xml:41
     implementation 'com.my.target:mytarget-sdk:5.5.6' // Assets/Appodeal/Editor/AppodealDependencies.xml:31
+    implementation 'com.parse.bolts:bolts-android:1.4.0' // Assets/FacebookSDK/Plugins/Editor/Dependencies.xml:4
     implementation 'com.squareup.picasso:picasso:2.5.2' // Assets/Appodeal/Editor/AppodealDependencies.xml:24
     implementation 'com.tapjoy:tapjoy-android-sdk:12.4.2@aar' // Assets/Appodeal/Editor/AppodealDependencies.xml:45
     implementation 'com.yandex.android:mobileads:2.142@aar' // Assets/Appodeal/Editor/AppodealDependencies.xml:56

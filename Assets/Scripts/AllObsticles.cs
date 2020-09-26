@@ -9,6 +9,7 @@ public class AllObsticles : MonoBehaviour
     public GameObject[,] obsticleMatrix;
     public bool[,] obsticlePattern;
     public bool obsticlesSet = false; 
+    public ObsticleMovementType levelObsticleMovmentType;
     void Start()
     {
         obsticleMatrix = new GameObject[xDim, yDim];
@@ -49,7 +50,11 @@ public class AllObsticles : MonoBehaviour
         {
             for (int j = 0; j < yDim; j++)
             {
-                if(obsticlePattern[i,j])obsticleMatrix[i,j].SetActive(true);
+                if(obsticlePattern[i,j])
+                {
+                    obsticleMatrix[i,j].SetActive(true);
+                    obsticleMatrix[i,j].GetComponent<ObsticleHandler>().thisObsticleMovementType = levelObsticleMovmentType;
+                }
             }
         }
         obsticlesSet = true;
