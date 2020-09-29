@@ -37,11 +37,6 @@
     <package>com.explorestack.ogury:sdk:4.7.2</package>
     <package>com.explorestack:iab:0.5.6</package>
     <package>com.facebook.android:audience-network-sdk:5.7.1</package>
-    <package>com.facebook.android:facebook-applinks:[7.1.0, 8)</package>
-    <package>com.facebook.android:facebook-core:[7.1.0, 8)</package>
-    <package>com.facebook.android:facebook-gamingservices:[7.1.0, 8)</package>
-    <package>com.facebook.android:facebook-login:[7.1.0, 8)</package>
-    <package>com.facebook.android:facebook-share:[7.1.0, 8)</package>
     <package>com.google.android.exoplayer:exoplayer-core:2.8.4@aar</package>
     <package>com.google.android.exoplayer:exoplayer-hls:2.8.4@aar</package>
     <package>com.google.android.gms:play-services-ads:16.0.0</package>
@@ -52,7 +47,6 @@
     <package>com.inmobi.monetization:inmobi-ads:7.3.0</package>
     <package>com.ironsource.sdk:mediationsdk:6.16.0</package>
     <package>com.my.target:mytarget-sdk:5.5.6</package>
-    <package>com.parse.bolts:bolts-android:1.4.0</package>
     <package>com.squareup.picasso:picasso:2.5.2</package>
     <package>com.tapjoy:tapjoy-android-sdk:12.4.2@aar</package>
     <package>com.yandex.android:mobileads:2.142@aar</package>

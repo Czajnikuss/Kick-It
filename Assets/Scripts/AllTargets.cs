@@ -5,27 +5,24 @@ using UnityEngine;
 public class AllTargets : MonoBehaviour
 {
     public int xDim = LevelConfig.xTarg, yDim = LevelConfig.yTarg;
-    public GameObject target;
+    public GameObject target, targetToChangeTo;
     public GameObject[,] targetMatrix;
     public bool[,] targetPattern;
     public int targetNumber; 
     public bool targetsSet = false;
     void Start()
     {
-        targetMatrix = new GameObject[xDim, yDim];
+        
         targetPattern = new bool[xDim, yDim];
         InitializeTargets();
         //RandomizeTargets();
        // SetTargets();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
     public void InitializeTargets()
     {
+        targetMatrix = new GameObject[xDim, yDim];
         GameObject tempTarget;
         for (int i = 0; i < xDim; i++)
         {
@@ -37,10 +34,24 @@ public class AllTargets : MonoBehaviour
             }
         }
     }
+    public void ChangeTargets()
+    {
+        if(target != targetToChangeTo && targetMatrix!= null &&targetMatrix[0,0] !=null )
+        {
+           foreach (var item in targetMatrix)
+            {
+                Destroy( item.gameObject);
+            }
+            target = targetToChangeTo;
+            PlayerPrefs.SetString("lastTargetName", targetToChangeTo.name);
+            InitializeTargets();
+            SetTargets();
+        }
+    }
     public void SetTargets()
     {
         targetNumber = 0;
-        StartCoroutine("SetTargetAfterWait");
+        StartCoroutine(SetTargetAfterWait());
     }
     IEnumerator SetTargetAfterWait()
     {

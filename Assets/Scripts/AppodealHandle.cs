@@ -87,7 +87,7 @@ public class AppodealHandle : MonoBehaviour, IRewardedVideoAdListener
         Appodeal.setLogLevel(Appodeal.LogLevel.Verbose);
         
 //Testing Mode        
-        Appodeal.setTesting(true);
+        Appodeal.setTesting(false);
 
     }
     private void  ShowConscentWindow()

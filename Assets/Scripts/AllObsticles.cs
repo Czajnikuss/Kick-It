@@ -5,27 +5,22 @@ using UnityEngine;
 public class AllObsticles : MonoBehaviour
 {
     public int xDim = LevelConfig.xObs, yDim = LevelConfig.yObs;
-    public GameObject obsticle;
+    public GameObject obsticle, obsticleToChangeTo;
     public GameObject[,] obsticleMatrix;
     public bool[,] obsticlePattern;
     public bool obsticlesSet = false; 
     public ObsticleMovementType levelObsticleMovmentType;
     void Start()
     {
-        obsticleMatrix = new GameObject[xDim, yDim];
         obsticlePattern = new bool[xDim, yDim];
         InitializeObsticles();
-        //RandomizeObsticles();
-        //SetObsticles();
+
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+  
     public void InitializeObsticles()
     {
+        obsticleMatrix = new GameObject[xDim, yDim];
         GameObject tempObst;
         for (int i = 0; i < xDim; i++)
         {
@@ -58,6 +53,20 @@ public class AllObsticles : MonoBehaviour
             }
         }
         obsticlesSet = true;
+    }
+
+    public void ChangeObsticles()
+    {
+        if(obsticle != obsticleToChangeTo && obsticleMatrix != null && obsticleMatrix[0,0] != null)
+        {
+           foreach (var item in obsticleMatrix)
+            {
+                Destroy( item.gameObject);
+            }
+            obsticle = obsticleToChangeTo;
+            PlayerPrefs.SetString("lastObsticleName", obsticle.name);
+            InitializeObsticles();
+        }
     }
     public void RandomizeObsticles()
     {

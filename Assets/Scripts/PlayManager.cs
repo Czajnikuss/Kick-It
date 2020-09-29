@@ -25,46 +25,98 @@ public class LevelConfig
 public class PlayManager : MonoBehaviour
 {
     public List<LevelConfig> allLevels = new List<LevelConfig>();
-    public TextMeshProUGUI movesText, ballsText, targetCaunterText;
+    public TextMeshProUGUI movesText, ballsText, targetCaunterText, coinsAmountText;
     public int moves, startMoves, currentLevel;
     private float timer, suspensionTime = 0.5f;
     public bool inputAllowed=false;
     
     public bool movesPossible = true;
     BallHandler ball;
-    EndPoint endPoint;
-    AllObsticles allObsticles;
-    AllTargets allTargets;
+    
+    public AllObsticles allObsticles;
+    public AllTargets allTargets;
+    ShopInGameManager shopInGameManager;
     int ballNumber, targetNumber;
     public GameObject winPanel, losePanel, gamePanel,mainMenuPanel, ballPrefab;
-
+    public int coinsAmount, rewardForTarget, rewardForFire, rewardForElectrycity;
     void Start()
     {
         winPanel.SetActive(false);
         losePanel.SetActive(false);
-        gamePanel.SetActive(true);
+        gamePanel.SetActive(false);
         mainMenuPanel.SetActive(true);
+        coinsAmount = PlayerPrefs.GetInt("coinsAmount", 0);
 
         currentLevel = PlayerPrefs.GetInt("lastLevel",0);
         
         moves=startMoves;
         movesText.text = "Moves: " + moves.ToString();
         
-        GameObject tempBall = Instantiate(ballPrefab, new Vector3(16f, 1f, 0.3f), Quaternion.identity);
-        ball = tempBall.GetComponent<BallHandler>();
-        
-        endPoint = FindObjectOfType<EndPoint>();
         allObsticles = FindObjectOfType<AllObsticles>();
         allTargets = FindObjectOfType<AllTargets>();
-        
+        shopInGameManager = GetComponent<ShopInGameManager>();
+        LoadLastGameEquipment();
         CreateLevelsList(50);
         
     }
+    private void LoadLastGameEquipment()
+    {
+        string tempBallName = PlayerPrefs.GetString("lastBallName", "Soccer Plain");
+        string tempObsticleName = PlayerPrefs.GetString("lastObsticleName", "BasicObsticle");
+        string tempTargetName = PlayerPrefs.GetString("lastTargetName", "Target");
+        foreach (var item in shopInGameManager.allItemsToBuy)
+        {
+            if(item.gameObject.name == tempBallName)
+            {
+                ballPrefab = item.gameObject;
+                item.equiped = true;
+                continue;
+            }
+            else if(item.gameObject.name == tempObsticleName)
+            {
+                item.equiped = true;
+                allObsticles.obsticleToChangeTo = item.gameObject;
+                
+                allObsticles.ChangeObsticles();
+                continue;
+            }
+            else if(item.gameObject.name == tempTargetName)
+            {
+                item.equiped = true;
+                allTargets.targetToChangeTo = item.gameObject;
+                allTargets.ChangeTargets();
+                continue;
+            }
+            
+        }
+        ChangeBall();
+    }
+    private void SaveLastBallName()
+    {
+        Debug.Log(ballPrefab.name);
+        PlayerPrefs.SetString("lastBallName", ballPrefab.name);
+    }
+    public void ChangeBall()
+    {
+        if(ball != null) 
+        {
+            ball.gameObject.SetActive(false);
+            Destroy(ball.gameObject);
+        }
+        GameObject tempBall = Instantiate(ballPrefab, new Vector3(16f, 1f, 0.3f), Quaternion.identity);
+        ball = tempBall.GetComponent<BallHandler>();
+        SaveLastBallName();
+    }        
     IEnumerator ResetFrameAfter()
     {
         yield return new WaitForSeconds(0.5f);
         
         ResetThisLevel();
+    }
+    public void ShowCoinsInGame()
+    {
+        coinsAmountText.text = coinsAmount.ToString();
+        PlayerPrefs.SetInt("coinsAmount", coinsAmount);
     }
     public void MoveMade()
     {
@@ -122,7 +174,7 @@ public class PlayManager : MonoBehaviour
         gamePanel.SetActive(true);
         losePanel.SetActive(false);
         winPanel.SetActive(false);
-        
+        Time.timeScale = 1;
         ballNumber = allTargets.targetNumber + 1;
         ShowBalls();
         timer = 0;
@@ -234,15 +286,18 @@ public class PlayManager : MonoBehaviour
     {
         if(ballNumber>0)
         {
-            StartCoroutine("NewBallAfterFrame");
+            StartCoroutine(NewBallAfterFrame());
         }
         else
         {
             //LOST
-            Debug.Log("LOST");
-            Time.timeScale = 0;
-            gamePanel.SetActive(false);
-            losePanel.SetActive(true);
+            if(inputAllowed && gamePanel.activeInHierarchy)
+            {
+                Debug.Log("LOST");
+                Time.timeScale = 0;
+                gamePanel.SetActive(false);
+                losePanel.SetActive(true);
+            }
         }
     }
     IEnumerator NewBallAfterFrame()
@@ -254,8 +309,14 @@ public class PlayManager : MonoBehaviour
     {
         targetCaunterText.text = "Targets: " + targetNumber.ToString();
     }
+    public void AddCoins(int amount)
+    {
+        coinsAmount += amount;
+        ShowCoinsInGame();
+    }
     public void TargetHit()
     {
+        AddCoins(rewardForTarget);
         targetNumber--;
         ShowTargetsAmaunt();
         if(targetNumber<=0)
@@ -273,7 +334,7 @@ public class PlayManager : MonoBehaviour
     }
     public void NextLevelButtonPressed()
     {
-        if(currentLevel%2==0)
+        if(currentLevel%2==0 && currentLevel > 3)
         {
             AppodealHandle.Instance.ShowVideoForNextLevel();
         }
@@ -297,23 +358,34 @@ public class PlayManager : MonoBehaviour
             tempTar = allTargets.targetPattern;
             allObsticles.RandomizeObsticles((int)Mathf.Floor(i/10f));
             tempObs = allObsticles.obsticlePattern;
-            if(i<= 10) levelObsticleMovementType = ObsticleMovementType.None;
-            else if(i>10) levelObsticleMovementType = ObsticleMovementType.OnlyY;
+            if(i>=0 && i<= 20) levelObsticleMovementType = ObsticleMovementType.None;
+            else if(i>20 && i <=30) levelObsticleMovementType = ObsticleMovementType.OnlyY;
             
-            else if(i>20) levelObsticleMovementType = ObsticleMovementType.OnlyZ;
-            else if(i>30) levelObsticleMovementType = ObsticleMovementType.Ramdom;
+            else if(i>30 && i <=40) levelObsticleMovementType = ObsticleMovementType.OnlyZ;
+            else if(i>40) levelObsticleMovementType = ObsticleMovementType.Ramdom;
             allLevels.Add(new LevelConfig(tempTar, tempObs, levelObsticleMovementType));
         }
     }
     public void NewGame()
     {
         currentLevel = 0;
+
         StartCoroutine(ResetFrameAfter());
         mainMenuPanel.SetActive(false);
+        gamePanel.SetActive(true);
+        ShowCoinsInGame();
+        Time.timeScale = 1;
     }
     public void Continue()
     {
-        StartCoroutine("ResetFrameAfter");
+        StartCoroutine(ResetFrameAfter());
         mainMenuPanel.SetActive(false);
+        gamePanel.SetActive(true);
+        ShowCoinsInGame();
+        Time.timeScale = 1;
+    }
+    public void ExitApp()
+    {
+        Application.Quit();
     }
 }

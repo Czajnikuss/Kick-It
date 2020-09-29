@@ -9,6 +9,8 @@ public class EndPoint : MonoBehaviour
     PlayManager playManager;
     public ParticleSystem boom;
     MeshRenderer meshRenderer;
+    public AudioClip boomSound;
+    public AudioSource audioSource;
 
     void Awake()
     {
@@ -36,6 +38,8 @@ public class EndPoint : MonoBehaviour
         
         meshRenderer.enabled = false;
         boom.gameObject.SetActive(true);
+        if(!audioSource.isPlaying) audioSource.PlayOneShot(boomSound);
+        
         boom.Play();
         
                 

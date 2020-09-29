@@ -24,6 +24,8 @@ public class ObsticleHandler : MonoBehaviour
     public Rigidbody rigidbodyThis;
     bool collidingStill = false;
     Vector3 startPos;
+    public AudioClip startFire, startElectric, getHit;
+    public AudioSource audioSource;
     
     private void Start() {
         
@@ -107,6 +109,7 @@ public class ObsticleHandler : MonoBehaviour
         StartCoroutine(RandomizeMovement());
     }
     private void OnCollisionEnter(Collision other) {
+        
         if(other.gameObject.GetComponent<BallHandler>())
         {
             BallHandler ballHandler = other.gameObject.GetComponent<BallHandler>();
@@ -128,7 +131,9 @@ public class ObsticleHandler : MonoBehaviour
     }
     IEnumerator ElectryfyObsticle()
     {
-        Debug.Log("electric");
+        
+        audioSource.PlayOneShot(startElectric);
+        playManager.AddCoins(playManager.rewardForElectrycity);
         electricSparks.Play(true);
         rigidbodyThis.isKinematic = true;
         yield return new WaitForSeconds(electryficationTime);
@@ -143,6 +148,9 @@ public class ObsticleHandler : MonoBehaviour
     }
     IEnumerator SetOnFire()
     {
+        
+        audioSource.PlayOneShot(startFire);
+        playManager.AddCoins(playManager.rewardForFire);
         fire.Play(true);
         yield return new WaitForSeconds(burnTime/3f);
         meshRenderer.material = beginBurnMaterial;
