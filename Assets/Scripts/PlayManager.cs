@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using EasyMobile;
 [System.Serializable]
 public class LevelConfig
 {
@@ -41,6 +42,8 @@ public class PlayManager : MonoBehaviour
     public int coinsAmount, rewardForTarget, rewardForFire, rewardForElectrycity;
     void Start()
     {
+        GameServices.Init();
+
         winPanel.SetActive(false);
         losePanel.SetActive(false);
         gamePanel.SetActive(false);
@@ -58,6 +61,28 @@ public class PlayManager : MonoBehaviour
         LoadLastGameEquipment();
         CreateLevelsList(50);
         
+    }
+    void OnEnable()
+    {
+        GameServices.UserLoginSucceeded += OnUserLoginSucceeded;
+        GameServices.UserLoginFailed += OnUserLoginFailed;
+    }
+    // Unsubscribe
+    void OnDisable()
+    {
+        GameServices.UserLoginSucceeded -= OnUserLoginSucceeded;
+        GameServices.UserLoginFailed -= OnUserLoginFailed;
+    }
+
+    // Event handlers
+    void OnUserLoginSucceeded()
+    {
+        Debug.Log("User logged in successfully.");
+    }
+
+    void OnUserLoginFailed()
+    {
+        Debug.Log("User login failed.");
     }
     private void LoadLastGameEquipment()
     {
@@ -324,6 +349,9 @@ public class PlayManager : MonoBehaviour
             //WIN
             Debug.Log("WIN level: " + currentLevel);
             PlayerPrefs.SetInt("lastLevel", currentLevel);
+
+           
+
             Time.timeScale = 0;
             gamePanel.SetActive(false);
             winPanel.SetActive(true);

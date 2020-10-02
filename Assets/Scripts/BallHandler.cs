@@ -13,6 +13,8 @@ public class BallHandler : MonoBehaviour
     float startDrag;
     bool beengDraged;
     public float magnitude;
+    private float invisibilityTimer, notVisibleMaxTime = 3f;
+    private bool ballVisible;
     
     public Vector3 startPos;
     private float shootEffectTimer=0, shootEffectCooldown = 1f;
@@ -25,8 +27,33 @@ public class BallHandler : MonoBehaviour
         fire.Stop(true);
         electricSparks.gameObject.SetActive(electryfy);
         electricSparks.Stop(true);
+        StartCoroutine(CheckBallVisibility());
+    }
+    IEnumerator CheckBallVisibility()
+    {
+        while (true)
+        {  
+            if(UtilsClass.I_Can_See(this.gameObject))
+            {   
+                
+                invisibilityTimer = 0;
+            }
+            else
+            {
+                
+                if(invisibilityTimer > notVisibleMaxTime)
+                {
+                    playManager.NewBall();
+                }
+                
+
+            }
+            yield return new WaitForSeconds(0.5f);
+        }
     }
     private void Update() {
+        //used to check how long ball was invisible
+        invisibilityTimer += Time.deltaTime;
         if(beengDraged && Input.GetMouseButtonUp(0)&& playManager.inputAllowed)
         {
             Shoot();

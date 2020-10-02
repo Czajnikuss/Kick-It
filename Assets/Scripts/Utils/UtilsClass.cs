@@ -371,6 +371,20 @@ namespace TalionApps.Utils {
             xy.Raycast(ray, out distance);
             return ray.GetPoint(distance);
         }
+            //Checking if Object is in field ofoview of a  main camera without disatance
+public static bool I_Can_See(GameObject Object) 
+{
+
+      //Looking for main Camera with Tag
+      Camera mainCamera = GameObject.FindWithTag("MainCamera").GetComponent<Camera>();
+      
+      
+      Plane[] planes = GeometryUtility.CalculateFrustumPlanes(mainCamera);
+      if (GeometryUtility.TestPlanesAABB(planes , Object.GetComponent<Collider>().bounds))
+          return true;
+      else
+          return false;
+ }
 
        
     }
