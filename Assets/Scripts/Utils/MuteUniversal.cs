@@ -9,13 +9,12 @@ public class MuteUniversal : MonoBehaviour
 {
     public Sprite muteSprite, soundSprite;
     bool isMute = false;
-    public AudioListener audioListener;
+    
     public Button thisObjectButton;
     
 
     private void Start() 
-    {
-        if(audioListener == null) audioListener = FindObjectOfType<AudioListener>(); 
+    { 
         if(thisObjectButton == null) thisObjectButton = GetComponent<Button>();     
     }
     public void SoundTougle()
@@ -23,7 +22,7 @@ public class MuteUniversal : MonoBehaviour
         if(isMute)
         {
             //turn listener on
-            audioListener.enabled = true;
+            AudioListener.pause =false;
             //show sound icon
             thisObjectButton.image.sprite = soundSprite;
             isMute = false;
@@ -31,7 +30,7 @@ public class MuteUniversal : MonoBehaviour
         else
         {
             //turn listener off
-            audioListener.enabled = false;
+            AudioListener.pause = true;
             //show sound icon
             thisObjectButton.image.sprite = muteSprite;
             isMute = true;

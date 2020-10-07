@@ -153,7 +153,7 @@ MonoBehaviour:
   itemClip: {fileID: 32900000, guid: 27744a6dd23da584199cfea538d56c83, type: 3}
   itemRendererTexture: {fileID: 8400000, guid: cac8475f0f9b99241940e2fd239f3e28, type: 2}
   infoToDisplay: Set ablaze and electryfy
-  priceCoins: 700
+  priceCoins: 500
   nameInOnLineStore: 
 --- !u!1001 &946540316
 PrefabInstance:

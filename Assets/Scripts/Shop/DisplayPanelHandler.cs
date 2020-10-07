@@ -42,7 +42,11 @@ public class DisplayPanelHandler : MonoBehaviour
             shopInGameManager.playManager.allTargets.targetToChangeTo = itemOnDisplay.gameObject;
             shopInGameManager.playManager.allTargets.ChangeTargets();
         }
-        
+        else if(itemOnDisplay.thisItemType == TypeOfItemToBuy.Envirement)
+        {
+            EnvirementSettingHolder tempEnv = itemOnDisplay.GetComponent<EnvirementSettingHolder>();
+            shopInGameManager.playManager.SetEnvirement(tempEnv);
+        }
     }
     public void Unequip()
     {

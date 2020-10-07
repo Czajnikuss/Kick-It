@@ -44,11 +44,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e9837fd531e9cf4f9d0a61c35b03365, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inInventory: 0
-  equiped: 0
+  inInventory: 1
+  equiped: 1
   thisItemType: 3
-  itemClip: {fileID: 0}
-  itemRendererTexture: {fileID: 0}
+  itemClip: {fileID: 32900000, guid: 2546ebbf24412f541a850086bd1d2872, type: 3}
+  itemRendererTexture: {fileID: 8400000, guid: 152697ff449386146833d0f0586855ab, type: 2}
   infoToDisplay: 
   priceCoins: 0
   nameInOnLineStore: 
@@ -74,4 +74,4 @@ MonoBehaviour:
   leftPanelUpMaterial: {fileID: 2100000, guid: 2eee5a153078b5d4aae143956eeed038, type: 2}
   leftPanelDownMaterial: {fileID: 2100000, guid: d1157f8149627cf43957e61ee519c79e,
     type: 2}
-  floorMAterial: {fileID: 2100000, guid: d1157f8149627cf43957e61ee519c79e, type: 2}
+  floorMaterial: {fileID: 2100000, guid: d1157f8149627cf43957e61ee519c79e, type: 2}

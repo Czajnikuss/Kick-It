@@ -171,7 +171,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e9837fd531e9cf4f9d0a61c35b03365, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inInventory: 1
+  inInventory: 0
   equiped: 0
   thisItemType: 1
   itemClip: {fileID: 32900000, guid: b6bba24d3d2eba347878f4b8e8a8cd08, type: 3}

@@ -52,6 +52,7 @@
     <package>com.google.android.exoplayer:exoplayer-core:2.8.4@aar</package>
     <package>com.google.android.exoplayer:exoplayer-hls:2.8.4@aar</package>
     <package>com.google.android.gms:play-services-ads:16.0.0</package>
+    <package>com.google.android.gms:play-services-ads:19.3.0</package>
     <package>com.google.android.gms:play-services-ads-identifier:16.0.0</package>
     <package>com.google.android.gms:play-services-base:16.0.1</package>
     <package>com.google.android.gms:play-services-basement:16.0.1</package>
