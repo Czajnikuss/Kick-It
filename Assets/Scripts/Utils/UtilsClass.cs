@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-namespace TalionApps.Utils {
+namespace TalionApps {
 
     /*
      * Various assorted utilities functions

@@ -147,13 +147,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e9837fd531e9cf4f9d0a61c35b03365, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inInventory: 1
+  inInventory: 0
   equiped: 0
   thisItemType: 0
   itemClip: {fileID: 32900000, guid: 5ca53d01d083af5458d2c68e57d4ef88, type: 3}
   itemRendererTexture: {fileID: 8400000, guid: 22946d019f331ff4fb8f916b49e367cf, type: 2}
   infoToDisplay: Just regular ball
-  priceCoins: 1
+  priceCoins: 50
   nameInOnLineStore: 
 --- !u!1001 &946540316
 PrefabInstance:

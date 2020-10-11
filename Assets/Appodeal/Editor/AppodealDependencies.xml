@@ -40,7 +40,6 @@
 		<androidPackage spec="com.appodeal.ads.sdk.networks:ironsource:2.6.5.3@aar"/>
 		<androidPackage spec="com.ironsource.sdk:mediationsdk:6.16.0"/>
 		<androidPackage spec="com.appodeal.ads.sdk.networks:ogury:2.6.5.3@aar"/>
-		<androidPackage spec="com.explorestack.ogury:sdk:4.7.2"/>
 		<androidPackage spec="com.appodeal.ads.sdk.networks:tapjoy:2.6.5.2@aar"/>
 		<androidPackage spec="com.tapjoy:tapjoy-android-sdk:12.4.2@aar"/>
 		<androidPackage spec="com.google.android.gms:play-services-basement:16.0.1"/>
@@ -51,7 +50,6 @@
 		<androidPackage spec="com.appodeal.ads.sdk.networks:smaato:2.6.5.2"/>
 		<androidPackage spec="com.appodeal.ads.sdk.networks:startapp:2.6.5.5"/>
 		<androidPackage spec="com.appodeal.ads.sdk.networks:unity_ads:2.6.5.3"/>
-		<androidPackage spec="com.appodeal.ads.sdk.networks:yandex:2.6.5.3@aar"/>
 		<androidPackage spec="com.yandex.android:mobmetricalib:3.13.1"/>
 		<androidPackage spec="com.yandex.android:mobileads:2.142@aar"/>
     </androidPackages>
@@ -69,14 +67,11 @@
         <iosPod name='APDInMobiAdapter' version='2.6.5.1' minTargetSdk='9.0'/>
         <iosPod name='APDInnerActiveAdapter' version='2.6.5.1' minTargetSdk='9.0'/>
         <iosPod name='APDIronSourceAdapter' version='2.6.5.1' minTargetSdk='9.0'/>
-        <iosPod name='APDMintegralAdapter' version='2.6.5.1' minTargetSdk='9.0'/>
         <iosPod name='APDPubnativeAdapter' version='2.6.5.1' minTargetSdk='9.0'/>
         <iosPod name='APDSmaatoAdapter' version='2.6.5.1' minTargetSdk='9.0'/>
         <iosPod name='APDStartAppAdapter' version='2.6.5.1' minTargetSdk='9.0'/>
         <iosPod name='APDTapjoyAdapter' version='2.6.5.1' minTargetSdk='9.0'/>
         <iosPod name='APDVungleAdapter' version='2.6.5.1' minTargetSdk='9.0'/>
-        <iosPod name='APDYandexAdapter' version='2.6.5.1' minTargetSdk='9.0'/>
         <iosPod name='APDUnityAdapter' version='2.6.5.1' minTargetSdk='9.0'/>
-        <iosPod name='APDOguryAdapter' version='2.6.5.1' minTargetSdk='9.0'/>
-    </iosPods>
+      </iosPods>
 </dependencies>

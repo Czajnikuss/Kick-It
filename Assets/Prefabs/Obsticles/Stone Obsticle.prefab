@@ -171,8 +171,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e9837fd531e9cf4f9d0a61c35b03365, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inInventory: 1
-  equiped: 1
+  inInventory: 0
+  equiped: 0
   thisItemType: 1
   itemClip: {fileID: 32900000, guid: 8e3e5b55714e3fc47a60ef3a9922a075, type: 3}
   itemRendererTexture: {fileID: 8400000, guid: c0150bdabba6d7544bf29b71432af590, type: 2}

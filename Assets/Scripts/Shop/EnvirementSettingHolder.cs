@@ -10,6 +10,6 @@ public class EnvirementSettingHolder : MonoBehaviour
    [Space]
    public Material leftPanelUpMaterial, leftPanelDownMaterial;
    [Space]
-   public Material floorMAterial;
+   public Material floorMaterial;
 
 }

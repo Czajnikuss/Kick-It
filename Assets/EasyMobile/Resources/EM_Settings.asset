@@ -45,7 +45,7 @@ MonoBehaviour:
         keys: []
         values: []
     mAdMob:
-      mEnable: 0
+      mEnable: 1
       mTargetingSettings:
         mTagForChildDirectedTreatment: 0
         mExtraOptions:
@@ -339,5 +339,5 @@ MonoBehaviour:
   mIsGameServiceModuleEnable: 1
   mIsNotificationModuleEnable: 0
   mIsSharingModuleEnable: 0
-  mActiveModuleIndex: 1
+  mActiveModuleIndex: 0
   mIsSelectingModule: 0

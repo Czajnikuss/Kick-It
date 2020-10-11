@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using EasyMobile;
+using UnityEngine.UI;
+
 [System.Serializable]
 public class LevelConfig
 {
@@ -33,6 +35,7 @@ public class PlayManager : MonoBehaviour
     
     public bool movesPossible = true;
     BallHandler ball;
+    public Button additionalCoinsButton;
     
     public AllObsticles allObsticles;
     public AllTargets allTargets;
@@ -40,6 +43,7 @@ public class PlayManager : MonoBehaviour
     int ballNumber, targetNumber;
     public GameObject winPanel, losePanel, gamePanel,mainMenuPanel, ballPrefab;
     public int coinsAmount, rewardForTarget, rewardForFire, rewardForElectrycity;
+    public MeshRenderer floorRenderer, backRenderer, rightRenderer, leftRenderer;
     void Start()
     {
         GameServices.Init();
@@ -59,7 +63,7 @@ public class PlayManager : MonoBehaviour
         allTargets = FindObjectOfType<AllTargets>();
         shopInGameManager = GetComponent<ShopInGameManager>();
         LoadLastGameEquipment();
-        CreateLevelsList(50);
+        CreateLevelsList(70);
         
     }
     void OnEnable()
@@ -195,13 +199,11 @@ public class PlayManager : MonoBehaviour
         allTargets.SetTargets();
        
         targetNumber = allTargets.targetNumber;
-        ShowTargetsAmaunt();
+        StartCoroutine("TillTargetsSet");
         gamePanel.SetActive(true);
         losePanel.SetActive(false);
         winPanel.SetActive(false);
         Time.timeScale = 1;
-        ballNumber = allTargets.targetNumber + 1;
-        ShowBalls();
         timer = 0;
         inputAllowed = false;
     }
@@ -355,6 +357,7 @@ public class PlayManager : MonoBehaviour
             Time.timeScale = 0;
             gamePanel.SetActive(false);
             winPanel.SetActive(true);
+            additionalCoinsButton.interactable = AppodealHandle.Instance.isRewardedVideoLoaded;
 
             
         }
@@ -416,4 +419,30 @@ public class PlayManager : MonoBehaviour
     {
         Application.Quit();
     }
+    public void SetEnvirement(EnvirementSettingHolder newEnvirementSettings )
+    {
+        Material[] tempMaterials = new Material[2];
+        if(newEnvirementSettings.floorMaterial != null) floorRenderer.material = newEnvirementSettings.floorMaterial;
+
+        if(newEnvirementSettings.backPanelUpMaterial != null && newEnvirementSettings.backPanelDownMaterial != null) 
+        {        
+            tempMaterials[1] = newEnvirementSettings.backPanelUpMaterial;
+            tempMaterials[0] = newEnvirementSettings.backPanelDownMaterial;
+            backRenderer.materials = tempMaterials;
+        }
+        if(newEnvirementSettings.leftPanelUpMaterial != null &&newEnvirementSettings.leftPanelDownMaterial != null)
+        {
+            tempMaterials[1] = newEnvirementSettings.leftPanelUpMaterial;
+            tempMaterials[0] = newEnvirementSettings.leftPanelDownMaterial;
+            leftRenderer.materials = tempMaterials;
+        }
+        if(newEnvirementSettings.rightPanelUpMaterial != null && newEnvirementSettings.rightPanelDownMaterial != null)
+        {
+            tempMaterials[1] = newEnvirementSettings.rightPanelUpMaterial;
+            tempMaterials[0] = newEnvirementSettings.rightPanelDownMaterial;
+            rightRenderer.materials = tempMaterials;
+        } 
+    }
+    
+
 }

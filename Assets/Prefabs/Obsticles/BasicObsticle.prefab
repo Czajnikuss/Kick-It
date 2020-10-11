@@ -172,7 +172,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inInventory: 1
-  equiped: 0
+  equiped: 1
   thisItemType: 1
   itemClip: {fileID: 32900000, guid: 21a90ea6547a96949bcb64e8f24370a5, type: 3}
   itemRendererTexture: {fileID: 8400000, guid: 6482092585b4218429ddf51ef6fab737, type: 2}

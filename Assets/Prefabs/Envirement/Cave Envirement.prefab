@@ -47,10 +47,10 @@ MonoBehaviour:
   inInventory: 0
   equiped: 0
   thisItemType: 3
-  itemClip: {fileID: 0}
-  itemRendererTexture: {fileID: 0}
-  infoToDisplay: 
-  priceCoins: 0
+  itemClip: {fileID: 32900000, guid: b2b6a2bbdb64d424fb5c67c34762c9c8, type: 3}
+  itemRendererTexture: {fileID: 8400000, guid: 359d7e751a598fb4a9f89cfaa6883057, type: 2}
+  infoToDisplay: Let's kick in a cave
+  priceCoins: 150
   nameInOnLineStore: 
 --- !u!114 &6160393334005752541
 MonoBehaviour:
@@ -74,4 +74,4 @@ MonoBehaviour:
   leftPanelUpMaterial: {fileID: 2100000, guid: c4b504225070cef498d3107fc1710c2d, type: 2}
   leftPanelDownMaterial: {fileID: 2100000, guid: c4b504225070cef498d3107fc1710c2d,
     type: 2}
-  floorMAterial: {fileID: 2100000, guid: c4b504225070cef498d3107fc1710c2d, type: 2}
+  floorMaterial: {fileID: 2100000, guid: c4b504225070cef498d3107fc1710c2d, type: 2}

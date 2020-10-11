@@ -12,6 +12,11 @@ public class AppodealHandle : MonoBehaviour, IRewardedVideoAdListener
     [Header("Reward Dispatch Variables")]
     public PlayManager playManager;   
     public Stores store = Stores.GooglePlay;
+    public bool isRewardedVideoLoaded
+    { 
+        private set; 
+        get;
+    }
     public enum Stores
     {
         GooglePlay,
@@ -20,7 +25,7 @@ public class AppodealHandle : MonoBehaviour, IRewardedVideoAdListener
 
     string thisStore;
     const string GooglePlayAppKey ="5357145b6d2bf5264b19d4ef1ee27efbae1d9ca308eea3a2";
-    const string AmazonAppKey = "";
+    const string AmazonAppKey = "42462e889282c8dd2a98bdf883d82461f3dce2a7c4a234a5";
 
     #region SINGLETON PATTERN
  public static AppodealHandle _instance;
@@ -51,24 +56,12 @@ public class AppodealHandle : MonoBehaviour, IRewardedVideoAdListener
     public Toggle conscenToggle;
 
     
-    
-    public event EventHandler<WinAdEventArgs> winAdBonus;
-    public class WinAdEventArgs : EventArgs
-    {
-        public int percent;
-        public WinAdEventArgs (int percent)
-        {
-            this.percent = percent;
-        }
-    }
-    public event EventHandler doublePassive;
-    
     [Header("Ads Problems")]
     public GameObject notShowingTryAgainPanel;
     
     void Start()
     {
-        
+        isRewardedVideoLoaded = false;
         if(store == Stores.Amazon) thisStore = AmazonAppKey; 
         else thisStore = GooglePlayAppKey;
         
@@ -141,7 +134,11 @@ By agreeing, you confirm that you are over the age of 16 and would like a person
     }
 
     #region Rewarded Video callback handlers
-    public void onRewardedVideoLoaded(bool isPrecache) { print("Video loaded"); } //Called when rewarded video was loaded (precache flag shows if the loaded ad is precache).
+    public void onRewardedVideoLoaded(bool isPrecache) //Called when rewarded video was loaded (precache flag shows if the loaded ad is precache).
+    { 
+        print("Video loaded"); 
+        isRewardedVideoLoaded = isPrecache;
+    }
     public void onRewardedVideoFailedToLoad() { print("Video failed"); } // Called when rewarded video failed to load
     public void onRewardedVideoShowFailed() // Called when rewarded video was loaded, but cannot be shown (internal network errors, placement settings, or incorrect creative)
     {
@@ -173,11 +170,11 @@ By agreeing, you confirm that you are over the age of 16 and would like a person
                 }
             );
         }
-        else if(name == "PassiveDouble")
+        else if(name == "Coins")
         {
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
                 {
-                    if(doublePassive != null) doublePassive(this, EventArgs.Empty);
+                    AddCoinsAfterAdd((int)amount);
                 }
             );
         }
@@ -211,6 +208,18 @@ By agreeing, you confirm that you are over the age of 16 and would like a person
     public void RestartLevel()
     {
         playManager.ResetThisLevel();
+    }
+    public void ShowVideoForCoins()
+    {
+        if(Appodeal.canShow(Appodeal.REWARDED_VIDEO))
+        {
+            Appodeal.show(Appodeal.REWARDED_VIDEO, "AddCoins");
+        }
+        
+    }
+    public void AddCoinsAfterAdd(int amount)
+    {
+        playManager.AddCoins(amount);
     }
    
    

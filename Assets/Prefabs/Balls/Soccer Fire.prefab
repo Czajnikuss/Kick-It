@@ -147,7 +147,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e9837fd531e9cf4f9d0a61c35b03365, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inInventory: 1
+  inInventory: 0
+  equiped: 0
   thisItemType: 0
   itemClip: {fileID: 32900000, guid: 9f3c2d74e07947a4aa7ba02f4f26ec01, type: 3}
   itemRendererTexture: {fileID: 8400000, guid: 437caf85d93b24f459506482e0909688, type: 2}

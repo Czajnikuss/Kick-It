@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TalionApps.Utils;
+using TalionApps;
 
 [RequireComponent(typeof (Rigidbody))]
 public class BallHandler : MonoBehaviour
